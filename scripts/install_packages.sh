@@ -1,4 +1,10 @@
-#!/bin/sh
+#!/bin/ksh
+
+if [ $(id -u) -ne 0 ]
+then
+  echo "Must be run as su."
+  exit
+fi
 
 MIRROR="https://cdn.openbsd.org/pub/OpenBSD"
 set -A packages git rsync

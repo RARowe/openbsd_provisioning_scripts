@@ -6,6 +6,8 @@ then
   exit
 fi
 
+POST_RECEIVE_PATH=/home/httpdconfig/httpd.conf/hooks/post-receive
+
 echo "Making sample httpd.conf at /etc/httpd/httpd.conf..."
 mkdir /etc/httpd
 cp /etc/examples/httpd.conf /etc/httpd/httpd.conf
@@ -15,6 +17,7 @@ echo "Adding user 'httpdconfig'..."
 useradd -mv -b /home/httpdconfig -d /home/httpdconfig httpdconfig
 chown -R httpdconfig /etc/httpd/ 
 chown -R httpdconfig /etc/httpd/*
+echo "permit httpdconfig nopass rcctl reload httpd" >> /etc/doas.conf
 echo "Done!"
 
 echo "Setting httpd to read from custom config..."
@@ -28,6 +31,7 @@ git init --bare /home/httpdconfig/httpd.conf
 cd helpers
 ksh create_post_receive\
   "\/home\/httpdconfig\/temp" "\/etc\/httpd\/httpd.conf" >\
-  /home/httpdconfig/httpd.conf/hooks/post-receive
+  $POST_RECEIVE_PATH
+echo "rcctl reload httpd" >> $POST_RECEIVE_PATH
 chown -R httpdconfig /home/httpdconfig/httpd.conf
 echo "Done!"
