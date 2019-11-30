@@ -1,10 +1,15 @@
 #!/bin/sh
 
+MIRROR="https://cdn.openbsd.org/pub/OpenBSD"
 set -A packages git rsync
+
+
+echo "Using mirror '$MIRROR'..."
+echo $MIRROR > /etc/installurl
 
 for package in ${packages[@]}
 do
-  if ! type $package > /dev/null
+  if ! type $package >> /dev/null
   then
     echo "Package '$package' not detected... adding..."
     pkg_add -v $package
