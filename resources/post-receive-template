@@ -1,0 +1,10 @@
+#!/bin/sh
+
+TARGET=##TARGET##
+TEMP=##TEMP##
+
+mkdir -p $TEMP
+git --work-tree=$TEMP checkout -f
+
+rsync -av $TEMP $TARGET
+rm -rf $TEMP

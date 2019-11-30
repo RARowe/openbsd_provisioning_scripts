@@ -1,0 +1,3 @@
+cat ../resources/post-receive-template |\
+sed s/##TEMP##/"$1"/g |\
+sed s/##TARGET##/"$2"/g
