@@ -21,16 +21,15 @@ echo "permit httpdconfig nopass rcctl reload httpd" >> /etc/doas.conf
 echo "Done!"
 
 echo "Setting httpd to read from custom config..."
-rcctl set httpd flags -f /etc/httpd/httpd.conf
 echo "Enabling httpd..."
 rcctl enable httpd
+rcctl set httpd flags -f /etc/httpd/httpd.conf
 echo "Done!"
 
 echo "Initializing httpd.conf repo..."
 git init --bare /home/httpdconfig/httpd.conf
-cd helpers
-ksh create_post_receive\
-  "\/home\/httpdconfig\/temp" "\/etc\/httpd\/httpd.conf" >\
+create_post_receive\
+  "\/home\/httpdconfig\/temp\/" "\/etc\/httpd\/" >\
   $POST_RECEIVE_PATH
 echo "rcctl reload httpd" >> $POST_RECEIVE_PATH
 chown -R httpdconfig /home/httpdconfig/httpd.conf

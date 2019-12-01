@@ -1,0 +1,52 @@
+#!/bin/ksh
+
+NAME=$1
+
+create_user() {
+  useradd -mv -b /home/$NAME -d /home/$NAME $NAME
+  git init --bare /home/$NAME/$NAME.git
+}
+
+create_post_receive_file() {
+  POST_RECEIVE_PATH=/home/$NAME/$NAME.git/hooks/post-receive
+  echo "\
+#!/bin/sh\n\
+\n\
+TARGET=/var/www/htdocs/$NAME\n\
+TEMP=/home/$NAME/temp/\n\
+\n\
+mkdir -p \$TEMP\n\
+git --work-tree=\$TEMP checkout -f\n\
+\n\
+rsync -a --progress --delete --delete-excluded --exclude .git/ --exclude .gitignore \$TEMP \$TARGET\n\
+rm -rf \$TEMP\n" > $POST_RECEIVE_PATH
+  chmod +x $POST_RECEIVE_PATH
+}
+
+grant_access_to_website_folder() {
+  chown -R $NAME /home/$NAME/*
+  mkdir /var/www/htdocs/$NAME
+  chown -R $NAME /var/www/htdocs/$NAME
+}
+
+if [ $(id -u) -ne 0 ]
+then
+  echo "Run as root."
+  exit
+fi
+
+if [[ $# -eq 0 ]]
+then
+  echo "usage: new_httpd_website [name]"
+  exit
+fi
+
+if getent passwd $NAME >> /dev/null
+then
+  echo "'$NAME' already exists. Try a different name."
+  exit
+fi
+
+create_user
+create_post_receive_file
+grant_access_to_website_folder

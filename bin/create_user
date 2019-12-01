@@ -1,0 +1,34 @@
+#!/bin/ksh
+
+NAME=$1
+REPO_NAME="$2.git"
+TARGET_RSYNC_PATH=$3
+HOME_PATH=/home/$NAME
+GIT_PATH=$HOME_PATH/$REPO_NAME
+POST_RECEIVE_PATH=$GIT_PATH/hooks/post-receive
+TEMP_RSYNC_PATH=$HOME_PATH/temp/
+
+add_additional_hook_commands() {
+  shift 3
+  for arg; do
+    echo $arg >> $POST_RECEIVE_PATH
+  done
+}
+
+if [ $(id -u) -ne 0 ]
+then
+  echo "Run as root."
+  exit
+fi
+
+if [[ $# -lt 3 ]]
+then
+  echo "usage: create_user [name] [repo_name] [target_rsync_path] [...additional_hook_commands]"
+  exit
+fi
+
+useradd -mv -b $HOME_PATH -d $HOME_PATH $NAME
+git init --bare $GIT_PATH
+create_post_receive $TEMP_RSYNC_PATH $TARGET_RSYNC_PATH > $POST_RECEIVE_PATH
+additional_hook_commands
+chmod +x $POST_RECEIVE_PATH

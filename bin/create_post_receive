@@ -1,0 +1,11 @@
+#!/bin/ksh
+
+if [[ -z "$RESOURCE_PATH" ]]
+then
+  echo "RESOURCE_PATH variable not set."
+  exit
+fi
+
+cat $RESOURCE_PATH |\
+sed 's|##TEMP##|'$1'|g' |\
+sed 's|##TARGET##|'$2'|g'
